@@ -1,9 +1,10 @@
 package com.demo.semesterservice.service;
 
+import com.demo.semesterservice.dto.MarkEvent;
 import com.demo.semesterservice.model.SemesterMark;
 import com.demo.semesterservice.repository.SemesterMarkRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,6 +16,8 @@ import java.util.List;
 @Service
 public class SemesterMarkService {
 
+    private static final Logger log = LoggerFactory.getLogger(SemesterMarkService.class);
+
     @Autowired
     private SemesterMarkRepository repository;
 
@@ -22,18 +25,13 @@ public class SemesterMarkService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, MarkEvent> kafkaTemplate;
 
     @Value("${user.service.url}")
     private String userServiceUrl;
 
-    @Value("${kafka.topic.mark-created}")
-    private String markCreatedTopic;
-
-    @Value("${kafka.topic.mark-updated}")
-    private String markUpdatedTopic;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${kafka.topic.marks}")
+    private String marksTopic;
 
     private boolean studentExists(String rollNumber) {
         try {
@@ -51,9 +49,20 @@ public class SemesterMarkService {
         if (!studentExists(mark.getStudentRollNumber())) {
             throw new RuntimeException("Student with roll number " + mark.getStudentRollNumber() + " not found");
         }
-        SemesterMark saved = repository.save(mark);
-        publishMarkEvent("CREATED", saved);
-        return saved;
+        SemesterMark savedMark = repository.save(mark);
+
+        // Publish to Kafka
+        MarkEvent event = new MarkEvent(
+                savedMark.getStudentRollNumber(),
+                savedMark.getSemester(),
+                savedMark.getSubject(),
+                savedMark.getMarks()
+        );
+        kafkaTemplate.send(marksTopic, savedMark.getStudentRollNumber(), event);
+        log.info("Published mark event to Kafka topic '{}': rollNumber={}, subject={}, marks={}",
+                marksTopic, savedMark.getStudentRollNumber(), savedMark.getSubject(), savedMark.getMarks());
+
+        return savedMark;
     }
 
     public SemesterMark updateMarks(Long id, SemesterMark updated) {
@@ -84,19 +93,14 @@ public class SemesterMarkService {
     }
 
     private void publishMarkEvent(String eventType, SemesterMark mark) {
-        SemesterMarkEvent event = new SemesterMarkEvent();
-        event.setEventType(eventType);
-        event.setStudentRollNumber(mark.getStudentRollNumber());
-        event.setSemester(mark.getSemester());
-        event.setSubject(mark.getSubject());
-        event.setMarks(mark.getMarks());
-
-        try {
-            String message = objectMapper.writeValueAsString(event);
-            String topic = "CREATED".equals(eventType) ? markCreatedTopic : markUpdatedTopic;
-            kafkaTemplate.send(topic, mark.getStudentRollNumber(), message);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize mark event", e);
-        }
+        MarkEvent event = new MarkEvent(
+                mark.getStudentRollNumber(),
+                mark.getSemester(),
+                mark.getSubject(),
+                mark.getMarks()
+        );
+        kafkaTemplate.send(marksTopic, mark.getStudentRollNumber(), event);
+        log.info("Published mark {} event to Kafka topic '{}': rollNumber={}, subject={}, marks={}",
+                eventType, marksTopic, mark.getStudentRollNumber(), mark.getSubject(), mark.getMarks());
     }
 }
