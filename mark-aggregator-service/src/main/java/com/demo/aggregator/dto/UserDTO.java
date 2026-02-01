@@ -1,28 +1,15 @@
-package com.demo.userservice.model;
+package com.demo.aggregator.dto;
 
-import jakarta.persistence.*;
+public class UserDTO {
 
-@Entity
-@Table(name = "users")
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
-    @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(unique = true)
     private String rollNumber;
-
     private String role;
-
     private String department;
 
-    public User() {
+    public UserDTO() {
     }
 
     public Long getId() {
