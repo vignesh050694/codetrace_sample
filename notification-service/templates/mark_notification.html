@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .mark-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .mark-card table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .mark-card td {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .mark-card td:first-child {
+            font-weight: bold;
+            color: #333;
+            width: 40%;
+        }
+        .status-pass {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .status-fail {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .overall-section {
+            background-color: #eaf2f8;
+            border-left: 4px solid #2980b9;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .overall-section h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .footer {
+            background-color: #ecf0f1;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mark {{ eventType | replace("_", " ") | title }} Notification</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Dear <strong>{{ studentName }}</strong>,</p>
+
+            <p>Your marks have been {{ "recorded" if eventType == "CREATED" else "updated" }} for the following subject:</p>
+
+            <div class="mark-card">
+                <table>
+                    <tr>
+                        <td>Roll Number</td>
+                        <td>{{ studentRollNumber }}</td>
+                    </tr>
+                    <tr>
+                        <td>Department</td>
+                        <td>{{ department }}</td>
+                    </tr>
+                    <tr>
+                        <td>Semester</td>
+                        <td>{{ semester }}</td>
+                    </tr>
+                    <tr>
+                        <td>Subject</td>
+                        <td>{{ subject }}</td>
+                    </tr>
+                    <tr>
+                        <td>Marks Obtained</td>
+                        <td>{{ marks }} / 100</td>
+                    </tr>
+                    <tr>
+                        <td>Percentage</td>
+                        <td>{{ "%.1f" | format(percentage) }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>
+                            {% if status == "PASS" %}
+                                <span class="status-pass">PASS</span>
+                            {% else %}
+                                <span class="status-fail">FAIL</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="overall-section">
+                <h3>Overall Performance</h3>
+                <table>
+                    <tr>
+                        <td style="font-weight:bold; color:#333; width:40%; padding:6px 0;">Overall Percentage</td>
+                        <td style="padding:6px 0;">{{ "%.1f" | format(overallPercentage) }}%</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; color:#333; width:40%; padding:6px 0;">Overall Status</td>
+                        <td style="padding:6px 0;">
+                            {% if overallStatus == "PASS" %}
+                                <span class="status-pass">PASS</span>
+                            {% else %}
+                                <span class="status-fail">FAIL</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size:14px; color:#555;">
+                If you have any questions regarding your marks, please contact your department coordinator.
+            </p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from the University Exam Portal.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
