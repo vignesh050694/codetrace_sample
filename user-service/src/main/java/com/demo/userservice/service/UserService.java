@@ -54,6 +54,9 @@ public class UserService {
         if (updated.getRollNumber() != null) {
             existing.setRollNumber(updated.getRollNumber());
         }
+        if (updated.getDepartment() != null) {
+            existing.setDepartment(updated.getDepartment());
+        }
         return userRepository.save(existing);
     }
 
