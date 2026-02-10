@@ -1,0 +1,13 @@
+{
+  "folders": [
+	{
+		"path": "user-service"
+	},
+	{
+		"path": "mark-aggregator-service"
+	},
+	{
+		"path": "semester-service"
+	}
+]
+}
