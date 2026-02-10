@@ -20,9 +20,9 @@ public class UserServiceClient {
     }
 
     public UserDTO fetchStudentByRollNumber(String rollNumber) {
-        String url = userServiceUrl + "/api/users/rollx/" + rollNumber;
+        String url = userServiceUrl + "/api/users/roll/" + rollNumber;
         try {
-            return null;//restTemplate.getForObject(url, UserDTO.class);
+            return restTemplate.getForObject(url, UserDTO.class);
         } catch (HttpClientErrorException.NotFound ex) {
             throw new RuntimeException("Student not found with roll number: " + rollNumber);
         } catch (Exception ex) {
