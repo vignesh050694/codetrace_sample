@@ -20,7 +20,7 @@ public class UserServiceClient {
     }
 
     public UserDTO fetchStudentByRollNumber(String rollNumber) {
-        String url = userServiceUrl + "/api/users/rolls/" + rollNumber;
+        String url = userServiceUrl + "/api/users/rollx/" + rollNumber;
         try {
             return restTemplate.getForObject(url, UserDTO.class);
         } catch (HttpClientErrorException.NotFound ex) {
